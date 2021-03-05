@@ -1,5 +1,13 @@
 Identifying Gaps and Overlaps insurance coverage among multiple plan types episode analysis
  
+  Two Solutions
+ 
+      a. Filling in the array of 365 day
+         Mark Keintz
+         mkeintz@outlook.com
+ 
+      b. Retaining latest date to get episoodes
+ 
 Github
 https://tinyurl.com/6sruwtaw
 https://github.com/rogerjdeangelis/utl-Identifying-Gaps-and-Overlaps-insurance-coverage-among-multiple-plan-types-episode-analysis
@@ -89,7 +97,46 @@ MYLIB.INSCOVDATA total obs=16
 | '_ \| '__/ _ \ / __/ _ \/ __/ __|
 | |_) | | | (_) | (_|  __/\__ \__ \
 | .__/|_|  \___/ \___\___||___/___/
-|_|
+|_|         __ _   _
+  __ _     / _(_) | |   __ _ _ __ _ __ __ _ _   _
+ / _` |   | |_| | | |  / _` | '__| '__/ _` | | | |
+| (_| |_  |  _| | | | | (_| | |  | | | (_| | |_| |
+ \__,_(_) |_| |_|_|_|  \__,_|_|  |_|  \__,_|\__, |
+                                            |___/
+;
+ 
+* it does not matter if you hit the same slot in the array mutiple times
+  you ar just overwriting with 1s;
+ 
+ 
+%let firstdateofinterest=01jan2002;
+%let lastdateofinterest=31dec2002;
+ 
+DATA want
+     (KEEP = PersID DaysCovered DaysUncovered);
+ 
+     set have;
+     by persID;
+ 
+     array dates_of_interest {%sysevalf("&firstdateofinterest"d):%sysevalf("&lastdateofinterest"d)} _temporary_;
+ 
+     if first.persid then call missing(of dates_of_interest{*}); * reset to missing;
+ 
+     do d=planstart to planend;
+       dates_of_interest{d}=1;
+     end;
+ 
+     if last.persid;
+     dayscovered=sum(of dates_of_interest{*});
+     daysuncovered="&lastdateofinterest"d - "&firstdateofinterest"d +1 - dayscovered;
+run;
+ 
+*_                 _        _         _       _            _
+| |__     _ __ ___| |_ __ _(_)_ __   | | __ _| |_ ___  ___| |_
+| '_ \   | '__/ _ \ __/ _` | | '_ \  | |/ _` | __/ _ \/ __| __|
+| |_) |  | | |  __/ || (_| | | | | | | | (_| | ||  __/\__ \ |_
+|_.__(_) |_|  \___|\__\__,_|_|_| |_| |_|\__,_|\__\___||___/\__|
+ 
 ;
  
 * See Mikes Paper for details;
@@ -149,5 +196,6 @@ Up to 40 obs WORK.WANT total obs=7
      6          295              70
      7          289              76
 */
+ 
  
  
